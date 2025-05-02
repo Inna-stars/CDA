@@ -1,5 +1,6 @@
 package com.collegedirectory.Application.service;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,7 +22,7 @@ public class UserService {
 	public ResponseEntity<?> saveUser(User user) {
 
 		Optional<User> optional = userDao.findByEmail(user.getEmail());
-		if (optional.isEmpty()) {
+		if (optional.isPresent()) {
 			ResponseStructure rs = ResponseStructure.builder().status(HttpStatus.BAD_REQUEST.value())
 					.message("user email already has a registered account").body(null).build();
 
@@ -34,8 +35,49 @@ public class UserService {
 
 		ResponseStructure rs = ResponseStructure.builder().status(HttpStatus.OK.value())
 				.message("User Saved Successfully").body(saveuser).build();
-		
+
 		ResponseEntity re = ResponseEntity.status(HttpStatus.OK).body(rs);
+
+		return re;
+	}
+
+	public ResponseEntity<?> deleteUserById(long uid) {
+
+		Optional<User> byId = userDao.findById(uid);
+		if (byId.isEmpty()) {
+			ResponseStructure rs = ResponseStructure.builder().status(HttpStatus.BAD_REQUEST.value())
+					.message("Invalid user id: " + uid).body(null).build();
+
+			ResponseEntity re = ResponseEntity.status(HttpStatus.BAD_REQUEST).body(rs);
+			return re;
+		}
+
+		userDao.deleteUserById(uid);
+		ResponseStructure rs = ResponseStructure.builder().status(HttpStatus.OK.value())
+				.message("User delete successfuly (deleted usr id " + uid + ")").body(null).build();
+
+		ResponseEntity re = ResponseEntity.status(HttpStatus.OK).body(rs);
+
+		return re;
+	}
+
+	public ResponseEntity<?> findAllUsers() {
+
+		List<User> allusers = userDao.findAllUsers();
+
+		if (allusers.isEmpty()) {
+			ResponseStructure rs = ResponseStructure.builder().status(HttpStatus.NOT_FOUND.value())
+					.message("No users found").body(null).build();
+
+			ResponseEntity re = ResponseEntity.status(HttpStatus.NOT_FOUND).body(rs);
+			return re;
+		}
+
+		ResponseStructure rs = ResponseStructure.builder().status(HttpStatus.FOUND.value()).message("List of All users")
+				.body(allusers).build();
+		
+		
+		ResponseEntity re = ResponseEntity.status(HttpStatus.FOUND).body(rs);
 
 		return re;
 	}
