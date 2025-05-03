@@ -15,7 +15,6 @@ import lombok.Setter;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
 public class Department {
 
 	@Id
