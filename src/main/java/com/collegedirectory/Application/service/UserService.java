@@ -1,6 +1,7 @@
 package com.collegedirectory.Application.service;
 
 import java.util.List;
+
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import com.collegedirectory.Application.dao.UserDao;
+import com.collegedirectory.Application.dto.Userdto;
 import com.collegedirectory.Application.entity.User;
 import com.collegedirectory.Application.responseStructure.ResponseStructure;
 import com.collegedirectory.Application.util.UserStatus;
@@ -75,9 +77,32 @@ public class UserService {
 
 		ResponseStructure rs = ResponseStructure.builder().status(HttpStatus.FOUND.value()).message("List of All users")
 				.body(allusers).build();
-		
-		
+
 		ResponseEntity re = ResponseEntity.status(HttpStatus.FOUND).body(rs);
+
+		return re;
+	}
+
+	public ResponseEntity<?> updateUser(Userdto dto) {
+
+		Optional<User> byId = userDao.findById(dto.getId());
+		if (byId.isEmpty()) {
+			throw new RuntimeException("Invalid user id");
+		}
+		User user = byId.get();
+		user.setUsername(dto.getUsername());
+		user.setEmail(dto.getEmail());
+		user.setName(dto.getName());
+		user.setPassword(dto.getPassword());
+		user.setPhone(dto.getPhone());
+		user.setStatus(UserStatus.ACTIVE);
+		
+		User saveUser = userDao.saveUser(user);
+
+		ResponseStructure rs = ResponseStructure.builder().status(HttpStatus.OK.value())
+				.message("user updated successfully").body(saveUser).build();
+		
+		ResponseEntity re = ResponseEntity.status(HttpStatus.OK).body(rs);
 
 		return re;
 	}
